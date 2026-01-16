@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme {
+    /* 定义你的品牌蓝色，以后代码里就能用 bg-brand 或 text-brand 了 */
+    --brand-blue: #0062cc;
+    --brand-blue-hover: #004a99;
+    --brand-light-blue: #f0f7ff;
+
+    --bg-body: #f8fafc;
+    --text-main: #1f2937;
+    --text-sub: #64748b;
+    --border-color: #e2e8f0;
+}
