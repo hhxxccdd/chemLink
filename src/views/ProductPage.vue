@@ -72,39 +72,46 @@
                                 </div>
 
                                 <div class="p-6 space-y-6">
-                                    <div v-if="displayProducts.length === 0" class="text-center py-20 text-slate-400">
+                                    <div v-if="loading" class="text-center py-20 text-slate-400">
+                                        {{ t('productsPage.loading') }}
+                                    </div>
+
+                                    <div v-else-if="displayProducts.length === 0"
+                                        class="text-center py-20 text-slate-400">
                                         {{ t("productList.empty") }}
                                     </div>
 
-                                    <div v-for="(prod, pIdx) in displayProducts" :key="pIdx"
+                                    <!-- 产品页 -->
+                                    <div v-for="(prod, pIdx) in displayProducts" :key="prod.id || pIdx"
                                         class="group p-6 rounded-lg border border-slate-100 hover:border-[#0060b0]/30 hover:shadow-md transition-all bg-white relative min-h-[110px] flex flex-col justify-center">
                                         <div class="pr-28">
                                             <h3
                                                 class="text-lg font-bold text-[#0060b0] group-hover:translate-x-1 transition-transform mb-2">
-                                                {{ prod.title }}
+                                                {{ productTitle(prod) }}
                                             </h3>
-
                                             <div class="flex flex-wrap gap-x-6 gap-y-1">
-                                                <div v-if="prod.cas !== '-'" class="flex items-center gap-2">
+                                                <div v-if="prod?.acf?.cas" class="flex items-center gap-2">
                                                     <span class="text-[12px] font-bold text-slate-400">
                                                         {{ t("productList.field.cas") }}:
                                                     </span>
-                                                    <span class="text-sm text-slate-600 font-mono">{{ prod.cas }}</span>
+                                                    <span class="text-sm text-slate-600 font-mono">{{ prod.acf.cas
+                                                        }}</span>
                                                 </div>
 
-                                                <div v-if="prod.item" class="flex items-center gap-2">
+                                                <div v-if="prod?.acf?.item" class="flex items-center gap-2">
                                                     <span class="text-[12px] font-bold text-slate-400">
                                                         {{ t("productList.field.item") }}:
                                                     </span>
-                                                    <span class="text-sm text-slate-600 font-mono">{{ prod.item
-                                                    }}</span>
+                                                    <span class="text-sm text-slate-600 font-mono">{{ prod.acf.item
+                                                        }}</span>
                                                 </div>
 
-                                                <div v-if="prod.ec" class="flex items-center gap-2">
+                                                <div v-if="prod?.acf?.ec" class="flex items-center gap-2">
                                                     <span class="text-[12px] font-bold text-slate-400">
                                                         {{ t("productList.field.ec") }}:
                                                     </span>
-                                                    <span class="text-sm text-slate-600 font-mono">{{ prod.ec }}</span>
+                                                    <span class="text-sm text-slate-600 font-mono">{{ prod.acf.ec
+                                                        }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -131,60 +138,108 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { productCatalog } from '../utils/data.js'
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { apiGetCatalog } from '../api/getProducts.js'
 
-// 1. 原始数据 (保持你提供的数组结构)
-const productData = ref(productCatalog)
+const { t, locale } = useI18n()
 
+// 分类 + 产品（来自 /chemlink/v1/catalog）
+const productData = ref([])
+const loading = ref(false)
 
-// 2. 交互状态
-const activeCategoryIndex = ref(0) // 当前选中的分类
-const searchQuery = ref('') // 搜索内容
+// 交互状态
+const activeCategoryIndex = ref(0)
 
-// 3. 计算属性：是否正在搜索
-const isSearching = computed(() => searchQuery.value.trim().length > 0)
+// 搜索：输入框实时值（模板 v-model 绑定这个）
+const searchQuery = ref('')
 
-// 4. 计算属性：最终展示的产品列表
-const displayProducts = computed(() => {
-    const query = searchQuery.value.trim().toLowerCase()
+// 搜索：防抖后的关键词（真正用于筛选）
+const debouncedQuery = ref('')
 
-    if (isSearching.value) {
-        // 如果在搜索，遍历所有大类下的产品进行过滤
-        const results = []
-        productData.value.forEach(cat => {
-            cat.products.forEach(prod => {
-                if (
-                    prod.title.toLowerCase().includes(query) ||
-                    prod.cas.toLowerCase().includes(query) ||
-                    prod.uses.toLowerCase().includes(query)
-                ) {
-                    results.push(prod)
-                }
-            })
-        })
-        return results
-    } else {
-        // 如果没搜索，显示当前选中分类下的产品
-        return productData.value[activeCategoryIndex.value]?.products || []
-    }
+// 防抖
+let debounceTimer = null
+watch(
+    searchQuery,
+    (val) => {
+        if (debounceTimer) clearTimeout(debounceTimer)
+        debounceTimer = setTimeout(() => {
+            debouncedQuery.value = (val ?? '').toString()
+        }, 300) // 防抖时间：300ms（你要更快/更慢可以改）
+    },
+    { flush: 'post' }
+)
+
+onBeforeUnmount(() => {
+    if (debounceTimer) clearTimeout(debounceTimer)
 })
 
+// 拉取 catalog 数据
+async function loadCatalog() {
+    loading.value = true
+    try {
+        const res = await apiGetCatalog()
+        productData.value = Array.isArray(res?.categories) ? res.categories : []
+        if (activeCategoryIndex.value >= productData.value.length) activeCategoryIndex.value = 0
+    } finally {
+        loading.value = false
+    }
+}
 
+onMounted(loadCatalog)
+
+// helpers：根据当前语言选择展示字段
+const isEn = computed(() => String(locale.value).toLowerCase().startsWith('en'))
+
+function pickText(zh, en) {
+    const z = (zh ?? '').toString().trim()
+    const e = (en ?? '').toString().trim()
+    return isEn.value ? (e || z) : (z || e)
+}
+
+function productTitle(prod) {
+    return pickText(prod?.acf?.productname || prod?.title, prod?.acf?.productname_en)
+}
+
+// 是否正在搜索（输入框有内容就算）
+const isSearching = computed(() => searchQuery.value.trim().length > 0)
+
+// 最终展示的产品列表
+// 规则：
+// - 不搜索时：展示当前选中分类下 products
+// - 搜索时：遍历所有分类下产品
+// - 匹配字段：仅【产品名称（中/英）】或【CAS】
+const displayProducts = computed(() => {
+    const q = debouncedQuery.value.trim().toLowerCase()
+    if (!q) return productData.value[activeCategoryIndex.value]?.products || []
+
+    const results = []
+    for (const cat of productData.value) {
+        const list = Array.isArray(cat?.products) ? cat.products : []
+        for (const p of list) {
+            const nameZh = p?.acf?.productname || p?.title || ''
+            const nameEn = p?.acf?.productname_en || ''
+            const cas = p?.acf?.cas || ''
+
+            const hay = [nameZh, nameEn, cas]
+                .filter(Boolean)
+                .map((v) => String(v).toLowerCase())
+                .join(' | ')
+
+            if (hay.includes(q)) results.push(p)
+        }
+    }
+    return results
+})
 </script>
 
+
 <style scoped>
-/* 1. 基础吸顶逻辑：PC端 */
 .product-header {
-    /* 这里的 72px 对应你的 HeaderComponent 高度 */
     top: 72px;
-    /* 增加微弱阴影增强吸顶时的视觉层级 */
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
 }
 
-/* 2. 隐藏滚动条 */
 .no-scrollbar::-webkit-scrollbar {
     display: none;
 }
@@ -194,25 +249,19 @@ const displayProducts = computed(() => {
     scrollbar-width: none;
 }
 
-/* 3. 响应式适配：移动端 */
 @media (max-width: 1024px) {
-
-    /* 移动端左侧分类栏变为横向吸顶 */
     aside {
         position: sticky;
         top: 72px;
-        /* 紧贴导航栏 */
         z-index: 30;
     }
 
-    /* 移动端产品标题头：需要避开 72px(导航) + 分类栏的高度(约56px) */
     .product-header {
         top: 128px;
         z-index: 20;
     }
 }
 
-/* 搜索框焦点 */
 input:focus {
     border-color: #0060b0 !important;
     outline: none;

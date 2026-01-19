@@ -18,7 +18,7 @@
                 </div>
 
                 <!-- 未找到 -->
-                <div v-else-if="!product"
+                <div v-else-if="notFound"
                     class="text-center py-20 bg-white rounded-[4px] shadow-sm border border-slate-100">
                     <div class="text-slate-300 mb-4 text-5xl">🧪</div>
                     <h2 class="text-xl font-bold text-slate-700">
@@ -62,7 +62,7 @@
 
                         <button
                             class="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-[#0060b0] mt-6 transition-colors"
-                            @click="goBack">
+                            @click="goBackToList">
                             <span class="text-base leading-none">←</span>
                             {{ t("productsPage.backList") }}
                         </button>
@@ -72,7 +72,7 @@
                     <div
                         class="lg:col-span-6 order-1 lg:order-2 bg-white rounded-[4px] shadow-sm border border-slate-100 p-8 min-h-[500px]">
                         <h1 class="text-2xl font-bold text-[#002B4D] mb-8 leading-tight">
-                            {{ product.title }}
+                            {{ product.title || "-" }}
                         </h1>
 
                         <div class="mb-8">
@@ -84,7 +84,7 @@
 
                         <div class="mb-8">
                             <h3 class="section-badge">{{ t("productsPage.groupTitle") }}</h3>
-                            <p class="text-slate-600 text-sm">{{ categoryName || "-" }}</p>
+                            <p class="text-slate-600 text-sm">{{ product.productcategory || "-" }}</p>
                         </div>
 
                         <div v-if="product.synonyms" class="mb-8">
@@ -133,29 +133,57 @@
 
 
 <script setup>
-import { ref, onMounted } from "vue"
+import { computed, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { productCatalog } from "@/utils/data.js"
+import { apiGetProducts } from "@/api/getProducts";
 import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
-const route = useRoute()
 const router = useRouter()
+const route = useRoute()
+const loading = ref(false)
+const productDetail = ref(null)
 
-const loading = ref(true)
-const product = ref(null)
-const categoryName = ref("")
 
-const findProductByNumericId = (idNum) => {
-    for (const cat of productCatalog) {
-        const match = (cat.products || []).find((p) => Number(p.id) === idNum)
-        if (match) return { product: match, categoryName: cat.name }
+// 把后端返回的数据（尤其是 ACF 字段）映射为页面统一使用的字段名
+const product = computed(() => {
+    const raw = productDetail.value || {}
+    const acf = raw.acf || {}
+    const isEn = String(locale.value || '').toLowerCase().startsWith('en')
+
+    return {
+        id: raw.id,
+        // 标题：优先使用 ACF 的中/英产品名；没有则回退 WP title
+        title: isEn ? (acf.productname_en || raw.title || "") : (acf.productname || raw.title || ""),
+        item: acf.item || "",
+        cas: acf.cas || "",
+        ec: acf.ec || "",
+        // 描述 & 用途
+        desc: isEn ? (acf.productdescription_en || "") : (acf.productdescription || ""),
+        uses: isEn ? (acf.majorapplication_en || "") : (acf.majorapplication || ""),
+        category: isEn ? (acf.productcategory_en || "") : (acf.productcategory || ""),
+        // 其它字段（如果后续要用）
+        link: raw.link || "",
     }
-    return { product: null, categoryName: "" }
-}
+})
 
-const goBack = () => {
-    router.push("/products")
+const notFound = computed(() => !loading.value && !product.value?.id)
+
+const getProductDetail = async (id) => {
+    if (!id) {
+        productDetail.value = null
+        return
+    }
+    loading.value = true
+    try {
+        // 你的 apiGetProducts 使用 axios params，需要传对象才能生成 ?id=xxx
+        const result = await apiGetProducts({ id })
+        // 兼容：有的接口直接返回对象；有的返回数组/对象包装
+        productDetail.value = Array.isArray(result) ? (result[0] || null) : (result?.data ?? result ?? null)
+        console.log("productDetail=", productDetail.value)
+    } finally {
+        loading.value = false
+    }
 }
 
 const goBackToList = () => router.push("/products")
@@ -170,13 +198,14 @@ const onRequestDocs = () => {
     alert("已点击：获取 MSDS/TDS（后续可接下载/接口）")
 }
 
-onMounted(() => {
-    const idNum = Number(route.params.id)
-    const result = findProductByNumericId(idNum)
-    product.value = result.product
-    categoryName.value = result.categoryName
-    loading.value = false
-})
+// 支持路由变化时复用组件（/products/:id 切换不同 id）
+watch(
+    () => route.params.id,
+    (id) => {
+        getProductDetail(id)
+    },
+    { immediate: true }
+)
 </script>
 
 <style scoped>

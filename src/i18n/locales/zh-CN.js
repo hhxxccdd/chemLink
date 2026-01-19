@@ -112,7 +112,7 @@ export default {
     title: "产品分类",
     subtitle: "专业化工材料解决方案提供商",
 
-    searchPlaceholder: "全局搜索：产品名 / CAS号 / 用途",
+    searchPlaceholder: "全局搜索：产品名 / CAS号",
     bigCatTitle: "产品大类",
     searchResult: "搜索结果",
     count: "共 {n} 个产品",

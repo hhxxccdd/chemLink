@@ -12,7 +12,7 @@ export default {
   },
 
   lang: {
-    zh: "中文",
+    zh: "中",
     en: "EN"
   },
 
@@ -111,7 +111,7 @@ export default {
     title: "Product Categories",
     subtitle: "Professional chemical material solution provider",
 
-    searchPlaceholder: "Global search: name / CAS / application",
+    searchPlaceholder: "Global search: name / CAS",
     bigCatTitle: "Main Categories",
     searchResult: "Search Results",
     count: "{n} products",

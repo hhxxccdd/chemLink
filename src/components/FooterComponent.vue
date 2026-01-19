@@ -14,7 +14,7 @@
                         <h4>{{ t("footer.quickNav") }}</h4>
                         <ul>
                             <li><router-link to="/">{{ t("footer.links.home") }}</router-link></li>
-                            <li><router-link to="/aboutUs">{{ t("footer.links.About") }}</router-link></li>
+                            <li><router-link to="/aboutUs">{{ t("footer.links.about") }}</router-link></li>
                             <li><router-link to="/products">{{ t("footer.links.products") }}</router-link></li>
                             <li><router-link to="/news">{{ t("footer.links.news") }}</router-link></li>
                         </ul>
