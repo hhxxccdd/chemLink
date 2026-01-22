@@ -10,16 +10,18 @@
         <!-- 新闻列表 -->
         <section id="news-list" class="section-padding">
             <div class="container">
-                <div class="news-grid">
-                    <!-- 写死的新闻数据 -->
+                <div v-if="loading" class="text-center py-20">
+                    <div class="loading-spinner"></div>
+                </div>
+                <div v-else-if="newsList.length === 0" class="text-center py-20 text-slate-500">
+                    {{ t("news.empty") }}
+                </div>
+                <div v-else class="news-grid">
                     <div class="news-item" v-for="news in paginatedNews" :key="news.id">
-                        <div class="news-img">
-                            <img :src="news.image" :alt="news.title" />
-                        </div>
                         <div class="news-content">
-                            <span class="date">{{ news.date }}</span>
-                            <a :href="`/news/${news.id}`" class="news-title">{{ news.title[locale] || news.title['zh-CN'] }}</a>
-                            <p class="news-excerpt">{{ news.excerpt[locale] || news.excerpt['zh-CN'] }}</p>
+                            <span class="date">{{ formatDate(news.acf.date || news.date) }}</span>
+                            <a :href="`/news/${news.id}`" class="news-title">{{ news.acf.title || news.title.rendered }}</a>
+                            <p class="news-excerpt">{{ news.acf.content }}</p>
                         </div>
                     </div>
                 </div>
@@ -59,25 +61,63 @@
 
 <script setup>
 import { useI18n } from "vue-i18n";
-import { computed, ref } from "vue";
+import { computed, ref, onMounted } from "vue";
 const { t, locale } = useI18n();
 
-// 导入新闻数据
-import { newsList } from "@/data/news";
+// 导入新闻 API
+import { apiGetNewsList } from "@/api/getNews";
+
+// 新闻数据和状态
+const newsList = ref([]);
+const loading = ref(false);
 
 // 分页状态变量
 const currentPage = ref(1); // 当前页码
 const pageSize = ref(5); // 每页条数
 
+// 加载新闻数据
+async function loadNews() {
+    loading.value = true;
+    try {
+        const news = await apiGetNewsList();
+        newsList.value = Array.isArray(news) ? news : [];
+    } catch (error) {
+        console.error("Failed to load news:", error);
+        newsList.value = [];
+    } finally {
+        loading.value = false;
+    }
+}
+
+// 格式化日期
+function formatDate(dateString) {
+    if (!dateString) return '';
+    
+    // 处理不同的日期格式
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+}
+
 // 计算属性
 const totalPages = computed(() => {
-  return Math.ceil(newsList.length / pageSize.value);
+  return Math.ceil(newsList.value.length / pageSize.value);
 });
 
 const paginatedNews = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
   const end = start + pageSize.value;
-  return newsList.slice(start, end);
+  return newsList.value.slice(start, end);
+});
+
+// 组件挂载时加载数据
+onMounted(() => {
+    loadNews();
 });
 </script>
 

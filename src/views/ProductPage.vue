@@ -178,9 +178,42 @@ onBeforeUnmount(() => {
 async function loadCatalog() {
     loading.value = true
     try {
-        const res = await apiGetCatalog()
-        productData.value = Array.isArray(res?.categories) ? res.categories : []
-        if (activeCategoryIndex.value >= productData.value.length) activeCategoryIndex.value = 0
+        const products = await apiGetCatalog()
+        
+        // 将产品按照 category 字段分组
+        const categoryMap = new Map()
+        
+        // 遍历所有产品
+        if (Array.isArray(products)) {
+            products.forEach(product => {
+                // 获取产品的分类
+                const categoryName = product?.acf?.category || '未分类'
+                const categoryNameEn = product?.acf?.category_en || 'Uncategorized'
+                
+                // 如果分类不存在，创建新分类
+                if (!categoryMap.has(categoryName)) {
+                    categoryMap.set(categoryName, {
+                        name: categoryName,
+                        name_en: categoryNameEn,
+                        products: []
+                    })
+                }
+                
+                // 将产品添加到对应分类中
+                categoryMap.get(categoryName).products.push(product)
+            })
+        }
+        
+        // 将 Map 转换为数组
+        productData.value = Array.from(categoryMap.values())
+        
+        // 确保 activeCategoryIndex 有效
+        if (activeCategoryIndex.value >= productData.value.length) {
+            activeCategoryIndex.value = 0
+        }
+    } catch (error) {
+        console.error('loadCatalog 错误:', error)
+        productData.value = []
     } finally {
         loading.value = false
     }
@@ -198,7 +231,7 @@ function pickText(zh, en) {
 }
 
 function productTitle(prod) {
-    return pickText(prod?.acf?.productname || prod?.title, prod?.acf?.productname_en)
+    return pickText(prod?.acf?.name || prod?.title?.rendered || '', prod?.acf?.name_en || '')
 }
 
 // 是否正在搜索（输入框有内容就算）
@@ -217,8 +250,8 @@ const displayProducts = computed(() => {
     for (const cat of productData.value) {
         const list = Array.isArray(cat?.products) ? cat.products : []
         for (const p of list) {
-            const nameZh = p?.acf?.productname || p?.title || ''
-            const nameEn = p?.acf?.productname_en || ''
+            const nameZh = p?.acf?.name || p?.title?.rendered || ''
+            const nameEn = p?.acf?.name_en || ''
             const cas = p?.acf?.cas || ''
 
             const hay = [nameZh, nameEn, cas]

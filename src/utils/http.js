@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const http = axios.create({
-  baseURL: "http://localhost/wordpress/wp-json", // ✅ 你的 WP REST 根路径
+  baseURL: "http://175.178.171.83/wp-json/wp/v2", // ✅ 你的 WP REST 根路径
   timeout: 10000,
 });
 
