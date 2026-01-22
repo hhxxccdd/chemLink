@@ -4,6 +4,8 @@ import ProductPage from '@/views/ProductPage.vue'
 import ProductDetailPage from '@/views/ProductDetailPage.vue'
 import NewsPage from '@/views/NewsPage.vue'
 import NewsDetailPage from '@/views/NewsDetailPage.vue'
+import AboutPage from '@/views/AboutPage.vue'
+import ContactPage from '@/views/ContactPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -12,6 +14,11 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomePage, // 2. 直接使用变量名，不要加 () => import(...)
+    },
+    {
+      path: '/about',
+      name: 'about',
+      component: AboutPage, // 关于我们页面路由
     },
     {
       path: '/products',
@@ -32,6 +39,11 @@ const router = createRouter({
       path: '/news/:id',
       name: 'news-detail',
       component: NewsDetailPage, // 新闻详情页面路由
+    },
+    {
+      path: '/contact',
+      name: 'contact',
+      component: ContactPage, // 联系我们页面路由
     },
   ],
   props: true // 将路由参数解耦为组件的 props

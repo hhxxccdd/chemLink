@@ -84,7 +84,7 @@
 
                         <div class="mb-8">
                             <h3 class="section-badge">{{ t("productsPage.groupTitle") }}</h3>
-                            <p class="text-slate-600 text-sm">{{ product.productcategory || "-" }}</p>
+                            <p class="text-slate-600 text-sm">{{ product.category || "-" }}</p>
                         </div>
 
                         <div v-if="product.synonyms" class="mb-8">
@@ -154,14 +154,14 @@ const product = computed(() => {
     return {
         id: raw.id,
         // 标题：优先使用 ACF 的中/英产品名；没有则回退 WP title
-        title: isEn ? (acf.productname_en || raw.title || "") : (acf.productname || raw.title || ""),
+        title: isEn ? (acf.name_en || raw.title?.rendered || "") : (acf.name || raw.title?.rendered || ""),
         item: acf.item || "",
         cas: acf.cas || "",
         ec: acf.ec || "",
         // 描述 & 用途
-        desc: isEn ? (acf.productdescription_en || "") : (acf.productdescription || ""),
-        uses: isEn ? (acf.majorapplication_en || "") : (acf.majorapplication || ""),
-        category: isEn ? (acf.productcategory_en || "") : (acf.productcategory || ""),
+        desc: isEn ? (acf.description_en || "") : (acf.description || ""),
+        uses: isEn ? (acf.application_en || "") : (acf.application || ""),
+        category: isEn ? (acf.category_en || "") : (acf.category || ""),
         // 其它字段（如果后续要用）
         link: raw.link || "",
     }

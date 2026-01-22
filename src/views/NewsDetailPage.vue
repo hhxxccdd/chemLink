@@ -10,29 +10,30 @@
         <!-- 新闻详情内容 -->
         <section id="news-detail" class="section-padding">
             <div class="container">
-                <div class="news-detail-wrapper">
+                <!-- 加载状态 -->
+                <div v-if="loading" class="text-center py-20">
+                    <div class="loading-spinner"></div>
+                </div>
+                
+                <!-- 错误状态 -->
+                <div v-else-if="error" class="text-center py-20 text-slate-500">
+                    {{ t("news.empty") }}
+                    <button class="btn-primary mt-4" @click="loadNewsDetail">
+                        {{ t("news.retry") }}
+                    </button>
+                </div>
+                
+                <!-- 新闻内容 -->
+                <div v-else class="news-detail-wrapper">
                     <article class="news-detail-content">
-                        <h2 class="detail-title">{{ currentNews.title[locale] || currentNews.title['zh-CN'] }}</h2>
+                        <h2 class="detail-title">{{ currentNews.title }}</h2>
                         <div class="detail-meta">
                             <span class="detail-date">{{ currentNews.date }}</span>
                         </div>
-                        <div class="detail-img">
-                            <img :src="currentNews.image" :alt="currentNews.title[locale] || currentNews.title['zh-CN']" />
-                        </div>
                         <div class="detail-body">
-                            <p>{{ currentNews.excerpt[locale] || currentNews.excerpt['zh-CN'] }}</p>
-                            <p>{{ currentNews.content[locale] || currentNews.content['zh-CN'] }}</p>
-                            <h3>{{ locale === 'zh-CN' ? '新闻要点' : 'News Highlights' }}</h3>
-                            <ul>
-                                <li>{{ locale === 'zh-CN' ? '新闻的主要信息点1' : 'Main news point 1' }}</li>
-                                <li>{{ locale === 'zh-CN' ? '新闻的主要信息点2' : 'Main news point 2' }}</li>
-                                <li>{{ locale === 'zh-CN' ? '新闻的主要信息点3' : 'Main news point 3' }}</li>
-                            </ul>
-                            <p>{{ locale === 'zh-CN' ? '通过新闻详情页面，用户可以获取更全面、更深入的新闻信息，提升网站的内容价值和用户体验。' : 'Through the news detail page, users can obtain more comprehensive and in-depth news information, enhancing the content value and user experience of the website.' }}</p>
+                            <p>{{ currentNews.content }}</p>
                         </div>
                     </article>
-
-
                 </div>
 
 
@@ -43,26 +44,79 @@
 
 <script setup>
 import { useI18n } from "vue-i18n";
-import { computed } from "vue";
-import { useRoute } from "vue-router";
+import { ref, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { apiGetNews } from "@/api/getNews";
 
 const { t, locale } = useI18n();
 const route = useRoute();
+const router = useRouter();
 
-// 导入新闻数据
-import { newsList } from "@/data/news";
-
-// 获取当前新闻ID
-const newsId = computed(() => {
-  return parseInt(route.params.id) || 1;
+// 新闻数据和状态
+const currentNews = ref({
+    id: '',
+    title: '',
+    date: '',
+    content: ''
 });
+const loading = ref(false);
+const error = ref(false);
 
-// 获取当前新闻详情
-const currentNews = computed(() => {
-  return newsList.find(news => news.id === newsId.value) || newsList[0];
+// 格式化日期
+function formatDate(dateString) {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+}
+
+// 加载新闻详情
+async function loadNewsDetail() {
+    const newsId = route.params.id;
+    if (!newsId) {
+        router.back();
+        return;
+    }
+    
+    loading.value = true;
+    error.value = false;
+    
+    try {
+        // 调用 API 获取新闻详情
+        const newsData = await apiGetNews({ id: newsId });
+        
+        // 处理返回数据
+        const news = Array.isArray(newsData) ? newsData[0] : newsData;
+        
+        if (news) {
+            // 映射 API 数据到组件使用的数据结构
+            currentNews.value = {
+                id: news.id,
+                title: news.acf.title || news.title.rendered,
+                date: formatDate(news.acf.date || news.date),
+                content: news.acf.content
+            };
+        } else {
+            error.value = true;
+        }
+    } catch (err) {
+        console.error("Failed to load news detail:", err);
+        error.value = true;
+    } finally {
+        loading.value = false;
+    }
+}
+
+// 组件挂载时加载数据
+onMounted(() => {
+    loadNewsDetail();
 });
-
-
 </script>
 
 <style scoped>

@@ -148,7 +148,8 @@ export default {
       home: "首页",
       about: "关于我们",
       products: "产品中心",
-      news: "新闻动态"
+      news: "新闻动态",
+      contact: "联系我们"
     },
 
     social: {
@@ -165,5 +166,91 @@ export default {
     },
 
     copyright: "© 2025 衢州化联科技有限公司 (ChemLink) | 版权所有"
+  },
+
+  // 关于我们页面
+  aboutPage: {
+    title: "关于我们",
+    subtitle: "二氧化碳基材料的负碳革新者",
+    
+    company: {
+      label: "公司简介",
+      labelEn: "COMPANY PROFILE",
+      title: "二氧化碳基材料的负碳革新者",
+      p1: "铂昕锐（BXR）是一家专注于二氧化碳基高性能材料的研发、生产与应用推广的科技创新型企业。公司以“碳中和技术的先行者”为愿景，致力于以工业废弃二氧化碳为原料，开发低碳、环保、可量化的碳基功能材料，推动碳中和目标的产业化实现。",
+      p2: "我们自主研发的二氧化碳基聚氨酯多元醇（PPC）及负碳醇（NCA-PC25）等产品，已成功应用于运动鞋材、防水涂料、合成革、医疗器械等多个领域，获得安踏、特步、科顺等行业头部客户的认可。通过权威第三方碳足迹认证（如必维BV），我们为客户提供可验证的低碳材料解决方案。",
+      p3: "未来，我们将持续深耕绿色材料技术，构建从碳源到终端应用的完整产业生态，致力于成为全球领先的碳中和材料系统供应商。"
+    },
+    
+    advantages: {
+      label: "核心优势",
+      labelEn: "CORE ADVANTAGES",
+      title: "我们的核心竞争力",
+      t1: "优秀的技术团队",
+      d1: "协同高校及科研院所进行产业链研发，团队包含材料博士、教授及深耕产业链专家。",
+      t2: "专业定制化服务",
+      d2: "快速响应客户需求，提供从研发、生产、测试到售后的全流程定制产品服务。",
+      t3: "研发实力雄厚",
+      d3: "高度重视并保持高水平研发投入，坚持技术创新，保证产品的先进性。",
+      t4: "环保可持续",
+      d4: "以工业废弃二氧化碳为原料，减少碳排放，推动可持续发展。"
+    },
+    
+    vision: {
+      title: "愿景",
+      content: "成为全球领先的碳中和材料系统供应商，推动二氧化碳基材料的广泛应用，助力实现碳中和目标。"
+    },
+    
+    mission: {
+      title: "使命",
+      content: "以科技创新为驱动，开发高性能、低碳足迹的二氧化碳基材料，为客户提供可持续的材料解决方案。"
+    }
+  },
+
+  // 联系我们页面
+  contactPage: {
+    title: "联系我们",
+    subtitle: "与我们取得联系，共同探索碳中和技术与绿色材料的未来",
+    
+    contactInfo: {
+      title: "联系方式",
+      address: {
+        title: "公司地址",
+        content: "浙江省衢州市柯城区凯旋北路3号"
+      },
+      phone: {
+        title: "联系电话",
+        content: "+86 570 1234 567"
+      },
+      email: {
+        title: "电子邮箱",
+        content: "contact@chemlink-qz.com"
+      }
+    },
+    
+    social: {
+      title: "关注我们"
+    },
+    
+    form: {
+      title: "发送消息",
+      name: "姓名",
+      namePlaceholder: "请输入您的姓名",
+      email: "电子邮箱",
+      emailPlaceholder: "请输入您的电子邮箱",
+      company: "公司名称",
+      companyPlaceholder: "请输入您的公司名称",
+      phone: "联系电话",
+      phonePlaceholder: "请输入您的联系电话",
+      subject: "主题",
+      subjectPlaceholder: "请输入消息主题",
+      message: "消息内容",
+      messagePlaceholder: "请输入您的消息内容",
+      submit: "发送消息"
+    },
+    
+    map: {
+      placeholder: "地图加载中..."
+    }
   }
 };

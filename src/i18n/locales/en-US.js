@@ -146,7 +146,8 @@ export default {
       home: "Home",
       about: "About",
       products: "Products",
-      news: "News"
+      news: "News",
+      contact: "Contact"
     },
 
     social: {
@@ -163,5 +164,91 @@ export default {
     },
 
     copyright: "© 2025 Quzhou Chemlink Technology Co., Ltd. (ChemLink) | All rights reserved."
+  },
+
+  // About Us Page
+  aboutPage: {
+    title: "About Us",
+    subtitle: "CO₂-based Materials Negative-Carbon Innovator",
+    
+    company: {
+      label: "About Us",
+      labelEn: "ABOUT US",
+      title: "CO₂-based Materials Negative-Carbon Innovator",
+      p1: "BXR is a tech-driven enterprise focused on R&D, manufacturing, and application of CO₂-based high-performance materials. With the vision of pioneering carbon neutrality, we use industrial captured CO₂ to develop low-carbon, eco-friendly, and measurable carbon-functional materials, accelerating industrial adoption of carbon neutrality.",
+      p2: "Our self-developed CO₂-based polyurethane polyols (PPC) and negative-carbon alcohol (NCA-PC25) have been successfully applied in sports footwear, waterproof coatings, synthetic leather, medical devices, and other fields, earning recognition from leading customers such as ANTA, XTEP, and KESHUN. Through authoritative third-party carbon footprint certification (e.g., Bureau Veritas), we provide verifiable low-carbon material solutions to our customers.",
+      p3: "In the future, we will continue to deepen our green material technologies, build a complete industrial ecosystem from carbon sources to end applications, and strive to become a global leader in carbon-neutral material systems."
+    },
+    
+    advantages: {
+      label: "Core Advantages",
+      labelEn: "CORE ADVANTAGES",
+      title: "Our Core Competitiveness",
+      t1: "Strong Technical Team",
+      d1: "Collaborating with universities and research institutes for industrial chain R&D, our team includes PhDs, professors, and industry experts with deep expertise.",
+      t2: "Professional Customized Services",
+      d2: "Quick response to customer needs, providing end-to-end customized product services from R&D, production, testing to after-sales support.",
+      t3: "Robust R&D Capability",
+      d3: "High emphasis on and sustained high-level R&D investment, adhering to technological innovation to ensure product advancement.",
+      t4: "Environmental Sustainability",
+      d4: "Using industrial captured CO₂ as raw material, reducing carbon emissions and promoting sustainable development."
+    },
+    
+    vision: {
+      title: "Vision",
+      content: "To become a global leader in carbon-neutral material systems, promoting widespread application of CO₂-based materials and contributing to the achievement of carbon neutrality goals."
+    },
+    
+    mission: {
+      title: "Mission",
+      content: "Driven by technological innovation, developing high-performance, low-carbon footprint CO₂-based materials, and providing sustainable material solutions to customers."
+    }
+  },
+
+  // Contact Us Page
+  contactPage: {
+    title: "Contact Us",
+    subtitle: "Get in touch with us to explore the future of carbon neutrality technologies and green materials",
+    
+    contactInfo: {
+      title: "Contact Information",
+      address: {
+        title: "Company Address",
+        content: "No. 3 Kaixuan North Rd., Kecheng District, Quzhou, Zhejiang, China"
+      },
+      phone: {
+        title: "Phone",
+        content: "+86 570 1234 567"
+      },
+      email: {
+        title: "Email",
+        content: "contact@chemlink-qz.com"
+      }
+    },
+    
+    social: {
+      title: "Follow Us"
+    },
+    
+    form: {
+      title: "Send Message",
+      name: "Name",
+      namePlaceholder: "Please enter your name",
+      email: "Email",
+      emailPlaceholder: "Please enter your email",
+      company: "Company",
+      companyPlaceholder: "Please enter your company name",
+      phone: "Phone",
+      phonePlaceholder: "Please enter your phone number",
+      subject: "Subject",
+      subjectPlaceholder: "Please enter the subject",
+      message: "Message",
+      messagePlaceholder: "Please enter your message",
+      submit: "Send Message"
+    },
+    
+    map: {
+      placeholder: "Map loading..."
+    }
   }
 };

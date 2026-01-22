@@ -117,14 +117,14 @@
                 <!-- 从wordpress导入数据 -->
                 <div class="news-grid">
                     <div v-for="news in featuredNews" class="news-item" :key="news.id">
-                        <span class="date">{{ news.date }}</span>
+                        <span class="date">{{ formatDate(news.acf.date || news.date) }}</span>
 
                         <a :href="`/news/${news.id}`" class="news-title">
-                            {{ news.title[locale] || news.title['zh-CN'] }}
+                            {{ news.acf.title || news.title.rendered }}
                         </a>
 
                         <p class="news-excerpt">
-                            {{ news.excerpt[locale] || news.excerpt['zh-CN'] }}
+                            {{ news.acf.content }}
                         </p>
                     </div>
                 </div>
@@ -136,15 +136,52 @@
 </template>
 <script setup>
 import { useI18n } from "vue-i18n";
-import { computed } from "vue";
+import { ref, onMounted, computed } from "vue";
 const { t, locale } = useI18n();
 
-// 导入新闻数据
-import { newsList } from "@/data/news";
+// 导入新闻 API
+import { apiGetNewsList } from "@/api/getNews";
 
-// 随机选择3个新闻
+// 新闻数据和状态
+const newsList = ref([]);
+const loading = ref(false);
+
+// 格式化日期
+function formatDate(dateString) {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+}
+
+// 加载新闻数据
+async function loadNews() {
+    loading.value = true;
+    try {
+        const news = await apiGetNewsList();
+        newsList.value = Array.isArray(news) ? news : [];
+    } catch (error) {
+        console.error("Failed to load news:", error);
+        newsList.value = [];
+    } finally {
+        loading.value = false;
+    }
+}
+
+// 精选新闻（前3条）
 const featuredNews = computed(() => {
-  return newsList.slice(0, 3);
+    return newsList.value.slice(0, 3);
+});
+
+// 组件挂载时加载数据
+onMounted(() => {
+    loadNews();
 });
 </script>
 
