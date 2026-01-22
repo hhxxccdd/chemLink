@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '@/views/HomePage.vue'
 import ProductPage from '@/views/ProductPage.vue'
 import ProductDetailPage from '@/views/ProductDetailPage.vue'
+import NcaProductDetailPage from '@/views/NcaProductDetailPage.vue'
 import NewsPage from '@/views/NewsPage.vue'
 import NewsDetailPage from '@/views/NewsDetailPage.vue'
 import AboutPage from '@/views/AboutPage.vue'
@@ -44,6 +45,15 @@ const router = createRouter({
       path: '/contact',
       name: 'contact',
       component: ContactPage, // 联系我们页面路由
+    },
+    {
+      path: '/nca-pc25',
+      name: 'nca-pc25',
+      component: NcaProductDetailPage, // 负碳醇 (NCA-PC25) 详情页面
+    },
+    {
+      path: '/products/nca-pc25',
+      redirect: '/nca-pc25', // 重定向到主要路由
     },
   ],
   props: true // 将路由参数解耦为组件的 props
